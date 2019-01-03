@@ -1,0 +1,23 @@
+{
+  "name": "events",
+  "version": "0.1.0",
+  "description": "",
+  "main": "events.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ilpoo/events.git"
+  },
+  "keywords": [],
+  "author": "ilpoo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ilpoo/events/issues"
+  },
+  "homepage": "https://github.com/ilpoo/events#readme",
+  "devDependencies": {
+    "typescript": "^3.2.2"
+  }
+}
