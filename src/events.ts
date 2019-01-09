@@ -18,20 +18,26 @@ export function throttle<T extends (...args: any[]) => void>(
   callback: T,
   timeout = 500,
   executeLastEvent = true,
+  ...initArguments: any[]
 ) {
   let lastCall: number | undefined;
   let timer: number | undefined;
-  return ((...args: any[]) => {
+  return ((
+    ...callArguments: any[]
+  ) => {
     const timeNow = Date.now();
     if (lastCall === undefined || timeNow - lastCall > timeout) {
       lastCall = timeNow;
-      callback(...args);
+      callback(...callArguments);
       if (typeof timer === "number") {
         clearTimeout(timer);
         timer = undefined;
       }
     } else if (executeLastEvent && timer === undefined) {
-      timer = setTimeout(() => callback(...args), timeout);
+      timer = setTimeout(() => callback(
+        ...callArguments,
+        ...initArguments,
+      ), timeout);
     }
   }) as T;
 }
@@ -84,15 +90,21 @@ export function finalEvent<T extends (...args: any[]) => void>(
 export function initialEvent<T extends (...args: any[]) => void>(
   callback: T,
   timeout = 500,
+  ...initArguments: any[]
 ) {
   let lastCall: number | undefined;
-  return ((...args: any[]) => {
+  return ((
+    ...callArguments: any[]
+  ) => {
     const now = Date.now();
     if (
       lastCall === undefined ||
       now - lastCall > timeout
     ) {
-      callback(...args);
+      callback(
+        ...callArguments,
+        ...initArguments,
+      );
     }
     lastCall = now;
   }) as T;
@@ -102,9 +114,18 @@ export function initialEvent<T extends (...args: any[]) => void>(
  * Syncs event call frequency with the screen refresh
  * rate.
  * 
+ * Any parameters passed after the callback are passed first to the
+ * callback when calling it. Any parameters passed to the returned
+ * function are passed after those parameters. The time value of the
+ * animation frame is passed after all the other parameters.
+ * 
  * Example usage:
  * 
- * canvas.addEventListener("mousemove", animationEvent(draw));
+ *    canvas.addEventListener("mousemove", animationEvent(draw, "foo"));
+ * 
+ *    function draw(myString, event, time) {
+ *      console.log(myString, event, time); //myString === "foo"
+ *    }
  * 
  * Above example would fire whenever the user moves their mouse
  * _and_ the browser is ready to render another frame, and not
@@ -115,13 +136,20 @@ export function initialEvent<T extends (...args: any[]) => void>(
  */
 export function animationEvent<T extends (...args: any[]) => void>(
   callback: T,
+  ...initArguments: any[]
 ) {
   let frame: number | undefined;
-  return ((...args: any[]) => {
+  return ((
+    ...callArguments: any[]
+  ) => {
     if (typeof frame === "number") {
       cancelAnimationFrame(frame);
     }
-    frame = requestAnimationFrame(time => callback(...args, time));
+    frame = requestAnimationFrame(time => callback(
+      time,
+      ...callArguments,
+      ...initArguments,
+    ));
   }) as T;
 }
 
@@ -135,7 +163,7 @@ export function animationEvent<T extends (...args: any[]) => void>(
  */
 export function startInterval(
   handler: Function,
-  timeout?: number,
+  timeout?: number | undefined,
   ...args: any[]
 ) {
   handler();
